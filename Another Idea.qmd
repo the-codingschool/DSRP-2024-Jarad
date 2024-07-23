@@ -1,0 +1,28 @@
+```{r}
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+coffee_df <- mutate(coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", TRUE ~ age)) # Make <18 properly alphabetized
+
+coffee_df <- coffee_df[!apply(coffee_df[, -1], 1, function(row) all(is.na(row))), ] #trying to remove data if everything is NA
+
+#coffee_df <- slice_sample(coffee_df, n = 41 )# I chose 41 because that is the max rows visible on my screen 
+
+coffee_df
+
+#filter(coffee_df, is.na(age), is.na(cups), is.na(where_drink), is.na(brew), is.na(brew_other), is.na(purchase), is.na(favorite), is.na(favorite_specify))
+
+```
