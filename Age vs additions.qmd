@@ -15,13 +15,16 @@ library(readr)
 
 ##pull and shrink data
 coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
-coffee_df <- mutate(coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", TRUE ~ age)) # Make <18 properly alphabetized
-coffee_df <- slice_sample(coffee_df, n = 41 )# I chose 41 becaseu that is the max rows visible on my screen
+clean_coffee_df <- mutate(coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", TRUE ~ age)) # Make <18 properly alphabetized
+clean_coffee_df <- clean_coffee_df[!apply(clean_coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
 
 ##exploring data
-new_coffee_df <- select(coffee_df, age, additions, everything())
+new_coffee_df <- select(clean_coffee_df, age, additions, everything())
 new_coffee_df <- filter(new_coffee_df, !is.na(age))
 new_coffee_df <- arrange(new_coffee_df, age, additions)
+
+new_coffee_df <- slice_sample(new_coffee_df, n = 41 )# I chose 41 becaseu that is the max rows visible on my screen
 
 summarise(group_by(new_coffee_df, age), additions)
 

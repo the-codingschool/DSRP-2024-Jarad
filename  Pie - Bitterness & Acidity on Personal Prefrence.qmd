@@ -1,0 +1,203 @@
+```{r}
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+clean_coffee_df <- mutate(coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", TRUE ~ age)) # Make <18 properly alphabetized
+clean_coffee_df <- clean_coffee_df[!apply(clean_coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+##exploring data
+
+##removing NAs
+new_coffeeA_df <- filter(clean_coffee_df, !is.na(coffee_a_bitterness), !is.na(coffee_a_acidity), !is.na(coffee_a_personal_preference))
+new_coffeeB_df <- filter(clean_coffee_df, !is.na(coffee_b_bitterness), !is.na(coffee_b_acidity), !is.na(coffee_b_personal_preference))
+new_coffeeC_df <- filter(clean_coffee_df, !is.na(coffee_c_bitterness), !is.na(coffee_c_acidity), !is.na(coffee_c_personal_preference))
+
+#new_coffeeA_df <- slice_sample(new_coffeeA_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+#new_coffeeB_df <- slice_sample(new_coffeeB_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+#new_coffeeC_df <- slice_sample(new_coffeeC_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+
+new_coffeeA_df <- select(new_coffeeA_df, coffee_a_bitterness, coffee_a_acidity, coffee_a_personal_preference, everything())
+new_coffeeA_df <- arrange(new_coffeeA_df, coffee_a_personal_preference, coffee_a_bitterness, coffee_a_acidity)
+
+new_coffeeB_df <- select(new_coffeeB_df, coffee_b_bitterness, coffee_b_acidity, coffee_b_personal_preference, everything())
+new_coffeeB_df <- arrange(new_coffeeB_df, coffee_b_bitterness, coffee_b_acidity, coffee_b_personal_preference)
+
+new_coffeeC_df <- select(new_coffeeC_df, coffee_c_bitterness, coffee_c_acidity, coffee_c_personal_preference, everything())
+new_coffeeC_df <- arrange(new_coffeeC_df, coffee_c_bitterness, coffee_c_acidity, coffee_c_personal_preference)
+
+
+# new_coffeeA_df
+# new_coffeeB_df
+# new_coffeeC_df
+
+
+#Presonal Prefrence
+
+freq_table <- as.data.frame(table(new_coffeeA_df$coffee_a_personal_preference))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of Personal Preferense for Coffee A") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+freq_table <- as.data.frame(table(new_coffeeB_df$coffee_b_personal_preference))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of Personal Preferense for Coffee B") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+freq_table <- as.data.frame(table(new_coffeeC_df$coffee_c_personal_preference))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of Personal Preferense for Coffee C") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+  
+  
+
+  
+#Bitterness
+  
+freq_table <- as.data.frame(table(new_coffeeA_df$coffee_a_bitterness))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of Bitterness for Coffee A") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+freq_table <- as.data.frame(table(new_coffeeB_df$coffee_b_bitterness))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of Bitterness for Coffee B") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+freq_table <- as.data.frame(table(new_coffeeC_df$coffee_c_bitterness))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of Bitterness for Coffee C") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+  
+  
+  
+#Acidity  
+  
+freq_table <- as.data.frame(table(new_coffeeA_df$coffee_a_acidity))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of  Acidity for Coffee A") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+freq_table <- as.data.frame(table(new_coffeeB_df$coffee_b_acidity))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of  Acidity for Coffee B") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+  
+  
+freq_table <- as.data.frame(table(new_coffeeC_df$coffee_c_acidity))
+colnames(freq_table) <- c("value", "count")
+
+freq_table$percentage <- (freq_table$count / sum(freq_table$count)) * 100
+
+ggplot(freq_table, aes(x = "", y = count, fill = factor(value))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = "Ratio of  Acidity for Coffee C") +
+  theme(legend.title = element_blank()) +
+  scale_fill_discrete(name = "Value")
+  geom_text(aes(label = paste0(round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5))
+```
+
