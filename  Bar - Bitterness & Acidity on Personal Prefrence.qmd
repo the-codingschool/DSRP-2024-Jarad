@@ -1,4 +1,6 @@
 ```{r}
+#Question: Does bitterness and acidity have an impact on prefrence
+
 ##install if needed
 if(!require("dplyr")) install.packages("dplyr")
 if(!require("janitor")) install.packages("janitor")
@@ -24,10 +26,12 @@ clean_coffee_df <- clean_coffee_df[!apply(clean_coffee_df[, -1], 1, function(x) 
 new_coffeeA_df <- filter(clean_coffee_df, !is.na(coffee_a_bitterness), !is.na(coffee_a_acidity), !is.na(coffee_a_personal_preference))
 new_coffeeB_df <- filter(clean_coffee_df, !is.na(coffee_b_bitterness), !is.na(coffee_b_acidity), !is.na(coffee_b_personal_preference))
 new_coffeeC_df <- filter(clean_coffee_df, !is.na(coffee_c_bitterness), !is.na(coffee_c_acidity), !is.na(coffee_c_personal_preference))
+new_coffeeD_df <- filter(clean_coffee_df, !is.na(coffee_d_bitterness), !is.na(coffee_d_acidity), !is.na(coffee_d_personal_preference))
 
 #new_coffeeA_df <- slice_sample(new_coffeeA_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
 #new_coffeeB_df <- slice_sample(new_coffeeB_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
 #new_coffeeC_df <- slice_sample(new_coffeeC_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+#new_coffeeD_df <- slice_sample(new_coffeeD_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
 
 new_coffeeA_df <- select(new_coffeeA_df, coffee_a_bitterness, coffee_a_acidity, coffee_a_personal_preference, everything())
 new_coffeeA_df <- arrange(new_coffeeA_df, coffee_a_personal_preference, coffee_a_bitterness, coffee_a_acidity)
@@ -38,10 +42,14 @@ new_coffeeB_df <- arrange(new_coffeeB_df, coffee_b_bitterness, coffee_b_acidity,
 new_coffeeC_df <- select(new_coffeeC_df, coffee_c_bitterness, coffee_c_acidity, coffee_c_personal_preference, everything())
 new_coffeeC_df <- arrange(new_coffeeC_df, coffee_c_bitterness, coffee_c_acidity, coffee_c_personal_preference)
 
+new_coffeeD_df <- select(new_coffeeD_df, coffee_d_bitterness, coffee_d_acidity, coffee_d_personal_preference, everything())
+new_coffeeD_df <- arrange(new_coffeeD_df, coffee_d_bitterness, coffee_d_acidity, coffee_d_personal_preference)
+
 
 # new_coffeeA_df
 # new_coffeeB_df
 # new_coffeeC_df
+# new_coffeeD_df
 
 
 grouped_df <- aggregate(cbind(coffee_a_bitterness, coffee_a_acidity) ~ coffee_a_personal_preference, data = new_coffeeA_df, FUN = mean)
@@ -125,6 +133,34 @@ ggplot(plot_data_long, aes(x = factor(coffee_c_personal_preference), y = value, 
   geom_bar(stat = "identity", position = "dodge") +
   labs(x = "Presonal Prefrence", y = "Average Value", title = "Bar Plot of Averages for Bitterness and Acidity by Personal Prefrence") +
   scale_fill_manual(values = c("coffee_c_bitterness" = "blue", "coffee_c_acidity" = "red")) +
+  theme_minimal()
+
+
+grouped_df <- aggregate(cbind(coffee_d_bitterness, coffee_d_acidity) ~ coffee_d_personal_preference, data = new_coffeeC_df, FUN = mean)
+
+# Print only summaries for outcomes 1 to 5
+for (coffee_d_personal_preference in 1:5) {
+  if (coffee_d_personal_preference %in% grouped_df$coffee_d_personal_preference) {
+    # Find the row corresponding to the current outcome
+    row <- grouped_df[grouped_df$coffee_d_personal_preference == coffee_d_personal_preference, ]
+    # Print the summary for the current outcome
+    cat("Coffee C Personal Prefrence:", row$coffee_d_personal_preference, 
+        "Average Bitterness:", round(row$coffee_d_bitterness, 2), 
+        "Average Acidity:", round(row$coffee_d_acidity, 2), "\n")
+  }
+}
+
+plot_data <- data.frame(
+  coffee_d_personal_preference = grouped_df$coffee_d_personal_preference,
+  coffee_d_bitterness = grouped_df$coffee_d_bitterness,
+  coffee_d_acidity = grouped_df$coffee_d_acidity)
+  
+plot_data_long <- reshape2::melt(plot_data, id.vars = "coffee_d_personal_preference")
+
+ggplot(plot_data_long, aes(x = factor(coffee_d_personal_preference), y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Presonal Prefrence", y = "Average Value", title = "Bar Plot of Averages for Bitterness and Acidity by Personal Prefrence") +
+  scale_fill_manual(values = c("coffee_d_bitterness" = "blue", "coffee_d_acidity" = "red")) +
   theme_minimal()
 
 ```
