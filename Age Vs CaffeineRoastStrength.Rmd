@@ -1,0 +1,58 @@
+```{r}
+coffee_survey_percent <- coffee_survey %>%
+  group_by(age, strength) %>%
+  tally() %>%
+  group_by(age) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  ungroup()
+
+ggplot(coffee_survey_percent, aes(x = age, y = percentage, fill = strength)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = sprintf("%.1f%%", percentage)),
+            position = position_fill(vjust = 0.5), size = 3, color = "white") +
+  labs(title = "Percentage of Coffee Strength Preferences by Age",
+       x = "Age",
+       y = "Percentage") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+coffee_survey_percent <- coffee_survey %>%
+  group_by(age, roast_level) %>%
+  tally() %>%
+  group_by(age) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  ungroup()
+
+ggplot(coffee_survey_percent, aes(x = age, y = percentage, fill = roast_level)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = sprintf("%.1f%%", percentage)),
+            position = position_fill(vjust = 0.5), size = 3, color = "white") +
+  labs(title = "Percentage of Coffee Roast Level Preferences by Age",
+       x = "Age",
+       y = "Percentage") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+coffee_survey_percent <- coffee_survey %>%
+  group_by(age, caffeine) %>%
+  tally() %>%
+  group_by(age) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  ungroup()
+
+# Stacked Bar Chart: Percentage of Caffeine Preferences by Age
+ggplot(coffee_survey_percent, aes(x = age, y = percentage, fill = caffeine)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = sprintf("%.1f%%", percentage)),
+            position = position_fill(vjust = 0.5), size = 3, color = "white") +
+  labs(title = "Percentage of Coffee Caffeine Preferences by Age",
+       x = "Age",
+       y = "Percentage") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+

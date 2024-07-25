@@ -1,0 +1,70 @@
+```{r}
+library(tidyverse)
+## EDUCATION VS CUPS
+coffee_survey$cups <- as.numeric(as.character(coffee_survey$cups))
+
+# Check for any conversion issues (NA values introduced)
+if (any(is.na(coffee_survey$cups))) {
+  warning("Some values in 'cups' could not be converted to numeric and are now NA.")
+}
+
+# Ensure 'education_level' is a factor
+coffee_survey$education_level <- as.factor(coffee_survey$education_level)
+
+# Handle missing values
+coffee_survey <- coffee_survey %>% drop_na(cups, education_level)
+
+avg <- coffee_survey %>%
+  group_by(education_level) %>%
+  summarise(avg_cups = mean(cups, na.rm = TRUE),
+            .groups = 'drop')
+
+
+ggplot(avg, aes(x = reorder(education_level, avg_cups), y = avg_cups, fill = education_level)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = round(avg_cups, 1)), vjust = -0.5, size = 3.5) +
+  labs(title = "Average Number of Cups of Coffee by Education Level",
+       x = "Education Level",
+       y = "Average Number of Cups of Coffee") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set3")
+
+ggplot(coffee_survey, aes(x = education_level, y = cups, fill = education_level)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Cups of Coffee by Education Level",
+       x = "Education Level",
+       y = "Number of Cups of Coffee") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set3")
+
+ggplot(coffee_survey, aes(x = cups, fill = education_level)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density Plot of Coffee Consumption by Education Level",
+       x = "Number of Cups of Coffee",
+       y = "Density") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+ggplot(coffee_survey, aes(x = education_level, y = cups, fill = education_level)) +
+  geom_violin() +
+  labs(title = "Violin Plot of Coffee Consumption by Education Level",
+       x = "Education Level",
+       y = "Number of Cups of Coffee") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set3")
+
+ggplot(coffee_survey, aes(x = cups, fill = education_level)) +
+  geom_histogram(bins = 10, position = "dodge") +
+  facet_wrap(~education_level) +
+  labs(title = "Histograms of Coffee Consumption by Education Level",
+       x = "Number of Cups of Coffee",
+       y = "Count") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3")
+
+
+```
+
