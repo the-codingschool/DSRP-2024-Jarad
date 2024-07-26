@@ -36,54 +36,41 @@ new_coffee_df = mutate(new_coffee_df, home = grepl("At home", where_drink))
 new_coffee_df = mutate(new_coffee_df, on_the_go = grepl("On the go", where_drink))
 new_coffee_df = mutate(new_coffee_df, other = grepl("None of these", where_drink))
 
+new_coffee_df <- select(new_coffee_df, age, where_drink, cafe, office, home, on_the_go, other, everything())
+new_coffee_df <- arrange(new_coffee_df, age, where_drink)
+summarise(group_by(new_coffee_df, age), where_drink,  cafe, office, home, on_the_go, other)
 
 
-# new_coffee_df <- select(new_coffee_df, age, additions, just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing, everything())
-# new_coffee_df <- arrange(new_coffee_df, age, additions)
-# summarise(group_by(new_coffee_df, age), additions, just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing)
+#just with total counts
+long_data <- new_coffee_df %>%
+  gather(key = "condition", value = "present", cafe, office, home, on_the_go, other) %>%
+  filter(present == TRUE) %>%
+  count(age, condition)
 
 
-print(unique(new_coffee_df$where_drink))
+ggplot(long_data, aes(x = age, y = n, fill = condition)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Age", y = "Count", fill = "Condition", title = "Locations by Age") +
+  theme_minimal()
 
 
 
+#proportional
+long_data <- new_coffee_df %>%
+  gather(key = "condition", value = "present",  cafe, office, home, on_the_go, other) %>%
+  group_by(age) %>%
+  mutate(total = n()) %>%
+  ungroup() %>%
+  filter(present == TRUE) %>%
+  count(age, condition) %>%
+  group_by(age) %>%
+  mutate(total = sum(n)) %>%
+  ungroup() %>%
+  mutate(proportion = n / total)
 
-
-
-
-
-# 
-# 
-# #just with total counts
-# long_data <- new_coffee_df %>%
-#   gather(key = "condition", value = "present", just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing) %>%
-#   filter(present == TRUE) %>%
-#   count(age, condition)
-# 
-# 
-# ggplot(long_data, aes(x = age, y = n, fill = condition)) +
-#   geom_bar(stat = "identity", position = "dodge") +
-#   labs(x = "Age", y = "Count", fill = "Condition", title = "Total Additions by Age") +
-#   theme_minimal()
-# 
-# 
-# 
-# #proportional
-# long_data <- new_coffee_df %>%
-#   gather(key = "condition", value = "present", just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing) %>%
-#   group_by(age) %>%
-#   mutate(total = n()) %>%
-#   ungroup() %>%
-#   filter(present == TRUE) %>%
-#   count(age, condition) %>%
-#   group_by(age) %>%
-#   mutate(total = sum(n)) %>%
-#   ungroup() %>%
-#   mutate(proportion = n / total)
-# 
-# ggplot(long_data, aes(x = age, y = proportion, fill = condition)) +
-#   geom_bar(stat = "identity", position = "dodge") +
-#   labs(x = "Age", y = "Proportion", fill = "Condition", title = "Additions Proportionaly by Age") +
-#   theme_minimal() +
-#   scale_y_continuous(labels = scales::percent)
+ggplot(long_data, aes(x = age, y = proportion, fill = condition)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Age", y = "Proportion", fill = "Condition", title = "Location of Consumption Proportionaly by Age") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent)
 ```
