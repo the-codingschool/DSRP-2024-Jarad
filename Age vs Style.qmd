@@ -1,0 +1,52 @@
+```{r}
+#Question: look at vs additions
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+
+clean_coffee_df <- coffee_df[!apply(coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+clean_coffee_df <- mutate(clean_coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", TRUE ~ age)) # Make <18 properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, age = case_when(age == ">65 years old" ~ "65+ years old", TRUE ~ age)) # Make <18 properly alphabetized
+
+##exploring data
+new_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(style))
+
+#new_coffee_df <- slice_sample(new_coffee_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+
+new_coffee_df <- select(new_coffee_df, age, style, everything())
+new_coffee_df <- arrange(new_coffee_df, age, style)
+
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$style), ]
+
+new_coffee_df
+
+#visualizing
+summary_df <- new_coffee_df %>%
+  group_by(age, style) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(age) %>%
+  mutate(percentage = (count / sum(count)) * 100)
+
+## Create the bar plot
+ggplot(summary_df, aes(x = age, y = percentage, fill = style)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Age Group", y = "Style", title = "Style by Age Group") +
+  theme_minimal()
+```
+

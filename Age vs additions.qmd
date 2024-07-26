@@ -54,7 +54,7 @@ long_data <- new_coffee_df %>%
 
 ggplot(long_data, aes(x = age, y = n, fill = condition)) +
   geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Age", y = "Count", fill = "Condition") +
+  labs(x = "Age", y = "Count", fill = "Condition", title = "Total Additions by Age") +
   theme_minimal()
 
 
@@ -74,7 +74,7 @@ long_data <- new_coffee_df %>%
 
 ggplot(long_data, aes(x = age, y = proportion, fill = condition)) +
   geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Age", y = "Proportion", fill = "Condition") +
+  labs(x = "Age", y = "Proportion", fill = "Condition", title = "Additions Proportionaly by Age") +
   theme_minimal() +
   scale_y_continuous(labels = scales::percent)
 

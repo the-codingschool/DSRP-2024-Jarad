@@ -1,0 +1,89 @@
+```{r}
+#Question: To what extent does age affect certain factors
+
+#I need to clean additions category - use "if includes"
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+clean_coffee_df <- mutate(coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", 
+                                                     age == ">65 years old" ~ "65+ years old",
+                                                     TRUE ~ age)) # Make <18 and >65 years old properly alphabetized
+
+clean_coffee_df <- clean_coffee_df[!apply(clean_coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+clean_coffee_df
+##exploring data
+new_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(where_drink))
+
+#new_coffee_df <- slice_sample(new_coffee_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+new_coffee_df = mutate(new_coffee_df, cafe = grepl("At a cafe", where_drink))
+new_coffee_df = mutate(new_coffee_df, office = grepl("At the office", where_drink))
+new_coffee_df = mutate(new_coffee_df, home = grepl("At home", where_drink))
+new_coffee_df = mutate(new_coffee_df, on_the_go = grepl("On the go", where_drink))
+new_coffee_df = mutate(new_coffee_df, other = grepl("None of these", where_drink))
+
+
+
+# new_coffee_df <- select(new_coffee_df, age, additions, just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing, everything())
+# new_coffee_df <- arrange(new_coffee_df, age, additions)
+# summarise(group_by(new_coffee_df, age), additions, just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing)
+
+
+print(unique(new_coffee_df$where_drink))
+
+
+
+
+
+
+
+
+# 
+# 
+# #just with total counts
+# long_data <- new_coffee_df %>%
+#   gather(key = "condition", value = "present", just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing) %>%
+#   filter(present == TRUE) %>%
+#   count(age, condition)
+# 
+# 
+# ggplot(long_data, aes(x = age, y = n, fill = condition)) +
+#   geom_bar(stat = "identity", position = "dodge") +
+#   labs(x = "Age", y = "Count", fill = "Condition", title = "Total Additions by Age") +
+#   theme_minimal()
+# 
+# 
+# 
+# #proportional
+# long_data <- new_coffee_df %>%
+#   gather(key = "condition", value = "present", just_black, sugar_sweetener, half_and_half, cinnamon, dairy, flavor_syrup, other, nothing) %>%
+#   group_by(age) %>%
+#   mutate(total = n()) %>%
+#   ungroup() %>%
+#   filter(present == TRUE) %>%
+#   count(age, condition) %>%
+#   group_by(age) %>%
+#   mutate(total = sum(n)) %>%
+#   ungroup() %>%
+#   mutate(proportion = n / total)
+# 
+# ggplot(long_data, aes(x = age, y = proportion, fill = condition)) +
+#   geom_bar(stat = "identity", position = "dodge") +
+#   labs(x = "Age", y = "Proportion", fill = "Condition", title = "Additions Proportionaly by Age") +
+#   theme_minimal() +
+#   scale_y_continuous(labels = scales::percent)
+```
