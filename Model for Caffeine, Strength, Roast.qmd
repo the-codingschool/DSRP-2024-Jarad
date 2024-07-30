@@ -24,6 +24,10 @@ coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
 
 clean_coffee_df <- coffee_df[!apply(coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
 
+clean_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(caffeine), !is.na(strength), !is.na(roast_level))
+clean_coffee_df <- arrange(clean_coffee_df, age, caffeine, strength, roast_level)
+clean_coffee_df <- dplyr::select(clean_coffee_df, age, caffeine, strength, roast_level)
+
 clean_coffee_df <- clean_coffee_df %>%
   mutate(age = case_when(
     age == "<18 years old" ~ "0-17 years old",
@@ -31,47 +35,85 @@ clean_coffee_df <- clean_coffee_df %>%
     TRUE ~ age
   )) %>%
   mutate(caffeine = case_when(
-    caffeine == "Full caffeine" ~ "1",
-    caffeine == "Half caff" ~ "0.5",
-    caffeine == "Decaf" ~ "0",
-    TRUE ~ caffeine
+    caffeine == "Full caffeine" ~ 1,
+    caffeine == "Half caff" ~ 0.5,
+    caffeine == "Decaf" ~ 0,
+    TRUE ~ 99
   )) %>%
   mutate(strength = case_when(
-    strength == "Weak" ~ "1",
-    strength == "Somewhat light" ~ "2",
-    strength == "Medium" ~ "3",
-    strength == "Somewhat strong" ~ "4",
-    strength == "Very strong" ~ "5",
-    TRUE ~ strength
+    strength == "Weak" ~ 1,
+    strength == "Somewhat light" ~ 2,
+    strength == "Medium" ~ 3,
+    strength == "Somewhat strong" ~ 4,
+    strength == "Very strong" ~ 5,
+    TRUE ~ 99
   )) %>%
   mutate(roast_level = case_when(
-    roast_level == "Blonde" ~ "1",
-    roast_level == "Nordic" ~ "1.5",
-    roast_level == "Light" ~ "2",
-    roast_level == "Medium" ~ "2.5",
-    roast_level == "Dark" ~ "3",
-    roast_level == "French" ~ "3.5",
-    roast_level == "Italian" ~ "4",
-    TRUE ~ roast_level
+    roast_level == "Blonde" ~ 1,
+    roast_level == "Nordic" ~ 1.5,
+    roast_level == "Light" ~ 2,
+    roast_level == "Medium" ~ 2.5,
+    roast_level == "Dark" ~ 3,
+    roast_level == "French" ~ 3.5,
+    roast_level == "Italian" ~ 4,
+    TRUE ~ 99
   )) # Make properly alphabetized
 
-# clean_coffee_df <- clean_coffee_df %>%
-#   mutate(age = case_when(
-#         age == "0-17 years old" ~ "1",
-#         age == "18-24 years old" ~ "2",
-#         age == "25-34 years old" ~ "3",
-#         age == "35-44 years old" ~ "4",
-#         age == "45-54 years old" ~ "5",
-#         age == "55-64 years old" ~ "6",
-#         age == "65+ years old" ~ "7",
-#         TRUE ~ age
-#   ))
-
-
 new_coffee_df <- clean_coffee_df %>%
-  filter(!is.na(age), !is.na(strength), !is.na(roast_level), !is.na(caffeine)) %>%
-  dplyr::select(age, strength, roast_level, caffeine) %>%
-  arrange(age, strength, roast_level, caffeine)
+  mutate(age = case_when(
+        age == "0-17 years old" ~ "15",
+        age == "18-24 years old" ~ "23",
+        age == "25-34 years old" ~ "33",
+        age == "35-44 years old" ~ "43",
+        age == "45-54 years old" ~ "53",
+        age == "55-64 years old" ~ "63",
+        age == "65+ years old" ~ "73",
+        TRUE ~ age
+  ))
+  
+
+
+
 
 new_coffee_df
+
+# Perform ANOVA test
+aov_test <- aov(age ~ strength + caffeine + roast_level, data = new_coffee_df)
+
+# Print summary of the ANOVA test
+summary(aov_test)
+
+
+# Create a data frame for the ANOVA results
+anova_results <- data.frame(
+  Factor = c("Strength", "Caffeine", "Roast Level"),
+  Sum_Sq = c(482, 633, 7650),
+  Mean_Sq = c(482, 633, 7650),
+  F_value = c(4.042, 5.299, 64.097),
+  Pr_F = c(0.0444, 0.0214, 1.55e-15),
+  Significance = c("*", "*", "***")
+)
+
+# Melt the data for plotting
+anova_melted <- anova_results %>%
+  pivot_longer(cols = c(Sum_Sq, Mean_Sq, F_value), names_to = "Metric", values_to = "Value")
+
+# Plot
+ggplot(anova_melted, aes(x = Factor, y = Value, fill = Metric)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("%.2f", Value)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5) +
+  scale_fill_manual(values = c("Sum_Sq" = "steelblue", "Mean_Sq" = "darkorange", "F_value" = "forestgreen")) +
+  labs(title = "ANOVA Results",
+       x = "Factor",
+       y = "Value",
+       fill = "Metric") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(aes(label = Significance), 
+            position = position_dodge(width = 0.9), 
+            vjust = 1.5, 
+            color = "black", 
+            size = 4)
 ```

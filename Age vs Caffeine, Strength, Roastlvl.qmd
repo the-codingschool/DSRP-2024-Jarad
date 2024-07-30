@@ -110,5 +110,8 @@ new_coffee_df <- new_coffee_df %>%
     age = as.numeric(age),
     roast_level = as.numeric(roast_level)
   )
+
+
+##re viz for aveages, total up values and proportionaly average
 ```
 
