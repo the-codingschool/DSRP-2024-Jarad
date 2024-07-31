@@ -41,34 +41,34 @@ clean_coffee_df <- clean_coffee_df %>%
     TRUE ~ 99
   )) %>%
   mutate(strength = case_when(
-    strength == "Weak" ~ 1,
-    strength == "Somewhat light" ~ 2,
-    strength == "Medium" ~ 3,
-    strength == "Somewhat strong" ~ 4,
-    strength == "Very strong" ~ 5,
+    strength == "Weak" ~ 0,
+    strength == "Somewhat light" ~ 0.25,
+    strength == "Medium" ~ 0.5,
+    strength == "Somewhat strong" ~ 0.75,
+    strength == "Very strong" ~ 1,
     TRUE ~ 99
   )) %>%
   mutate(roast_level = case_when(
-    roast_level == "Blonde" ~ 1,
-    roast_level == "Nordic" ~ 1.5,
-    roast_level == "Light" ~ 2,
-    roast_level == "Medium" ~ 2.5,
-    roast_level == "Dark" ~ 3,
-    roast_level == "French" ~ 3.5,
-    roast_level == "Italian" ~ 4,
+    roast_level == "Blonde" ~ 0,
+    roast_level == "Nordic" ~ 0.16666666666666,
+    roast_level == "Light" ~ 0.333333333333333,
+    roast_level == "Medium" ~ 0.5,
+    roast_level == "Dark" ~ 0.666666666666666666,
+    roast_level == "French" ~ 0.83333333333,
+    roast_level == "Italian" ~ 1,
     TRUE ~ 99
   )) # Make properly alphabetized
 
 new_coffee_df <- clean_coffee_df %>%
   mutate(age = case_when(
-        age == "0-17 years old" ~ "15",
-        age == "18-24 years old" ~ "23",
-        age == "25-34 years old" ~ "33",
-        age == "35-44 years old" ~ "43",
-        age == "45-54 years old" ~ "53",
-        age == "55-64 years old" ~ "63",
-        age == "65+ years old" ~ "73",
-        TRUE ~ age
+        age == "0-17 years old" ~ 15,
+        age == "18-24 years old" ~ 23,
+        age == "25-34 years old" ~ 44,
+        age == "35-44 years old" ~ 43,
+        age == "45-54 years old" ~ 53,
+        age == "55-64 years old" ~ 63,
+        age == "65+ years old" ~ 73,
+        TRUE ~ 99
   ))
   
 
@@ -78,20 +78,20 @@ new_coffee_df <- clean_coffee_df %>%
 new_coffee_df
 
 # Perform ANOVA test
-aov_test <- aov(age ~ strength + caffeine + roast_level, data = new_coffee_df)
+aov_test <- aov(age ~ caffeine + roast_level + strength, data = new_coffee_df)
 
 # Print summary of the ANOVA test
 summary(aov_test)
 
 
-# Create a data frame for the ANOVA results
+
 anova_results <- data.frame(
-  Factor = c("Strength", "Caffeine", "Roast Level"),
-  Sum_Sq = c(482, 633, 7650),
-  Mean_Sq = c(482, 633, 7650),
-  F_value = c(4.042, 5.299, 64.097),
-  Pr_F = c(0.0444, 0.0214, 1.55e-15),
-  Significance = c("*", "*", "***")
+  Factor = c("Caffeine", "Roast Level", "Strength"),
+  Sum_Sq = c(106, 3687, 15),
+  Mean_Sq = c(106, 3687, 15),
+  F_value = c(1.114, 38.765, 0.159),
+  Pr_F = c(0.291, 5.29e-10, 0.690),
+  Significance = c(" ", "***", " ")
 )
 
 # Melt the data for plotting
@@ -111,9 +111,9 @@ ggplot(anova_melted, aes(x = Factor, y = Value, fill = Metric)) +
        fill = "Metric") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_text(aes(label = Significance), 
-            position = position_dodge(width = 0.9), 
-            vjust = 1.5, 
+  geom_text(data = anova_melted %>% filter(Metric == "F_value"), 
+            aes(x = Factor, y = Value + 5, label = anova_results$Significance), 
+            vjust = -0.5, 
             color = "black", 
             size = 4)
 ```
