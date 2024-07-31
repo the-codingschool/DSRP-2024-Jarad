@@ -1,0 +1,489 @@
+```{r}
+#Question: look at vs additions
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+if(!require("fmsb")) install.packages("fmsb")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(fmsb)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+
+clean_coffee_df <- coffee_df[!apply(coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+clean_coffee_df <- mutate(clean_coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", TRUE ~ age)) # Make <18 properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, age = case_when(age == ">65 years old" ~ "65+ years old", TRUE ~ age)) # Make <18 properly alphabetized
+
+##exploring data
+new_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(style))
+
+#new_coffee_df <- slice_sample(new_coffee_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+
+new_coffee_df <- dplyr::select(new_coffee_df, age, style, everything())
+new_coffee_df <- arrange(new_coffee_df, age, style)
+
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$style), ]
+
+new_coffee_df
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "0-17 years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "18-24 years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "25-34 years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "35-44 years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "44-45 years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "45-54 years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "55-64 years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+new_coffee_df_summary <- new_coffee_df %>%
+  group_by(age, style) %>%
+  tally(name = "count") %>%
+  ungroup()
+
+# Convert to wide format for radar chart
+new_coffee_df_wide <- new_coffee_df_summary %>%
+  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Function to plot radar chart for one age group
+plot_radar_chart <- function(data, age_group) {
+  data_filtered <- data %>%
+    filter(age == age_group) %>%
+    select(-age) %>%
+    as.data.frame()
+  
+  # Add rows for max and min values
+  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
+                      rep(0, ncol(data_filtered)),  # Min
+                      data_filtered)  # Age group data
+
+  # Plot radar chart
+  radarchart(radar_data, axistype = 1, 
+             pcol = rainbow(nrow(radar_data) - 2), 
+             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
+             plwd = 2, 
+             cglcol = "grey", 
+             cglty = 1, 
+             axislabcol = "grey", 
+             vlcex = 0.8)
+}
+
+# Specify the age group you want to visualize
+age_group_to_plot <- "65+ years old"  # Change this to the desired age group
+
+# Ensure the age group exists in the data
+if (age_group_to_plot %in% new_coffee_df$age) {
+  # Set up plotting area
+  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
+
+  # Plot radar chart for the specified age group
+  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
+} else {
+  cat("Age group", age_group_to_plot, "is not in the data.")
+}
+```
+
