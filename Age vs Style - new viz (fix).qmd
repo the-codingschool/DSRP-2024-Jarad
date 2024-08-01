@@ -38,8 +38,9 @@ new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$style), ]
 
 new_coffee_df
 
+desired_order = c("Fruity", "Juicy", "Sweet", "Bright", "Floral", "Light", "Chocolatey", "Caramalized", "Nutty", "Complex", "Bold", "Full Bodied")
 
-
+new_coffee_df$style <- factor(new_coffee_df$style, levels = desired_order, ordered = TRUE)
 
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
