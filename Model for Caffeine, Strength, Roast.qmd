@@ -8,6 +8,7 @@ if(!require("ggplot2")) install.packages("ggplot2")
 if(!require("tidyr")) install.packages("tidyr")
 if(!require("readr")) install.packages("readr")
 if(!require("caTools")) install.packages("caTools")
+if(!require("ggrepel")) install.packages("ggrepel")
 
 
 ##bring in libraries
@@ -17,6 +18,7 @@ library(ggplot2)
 library(tidyr)
 library(readr)
 library(caTools)
+library(ggrepel)
 
 
 ##pull and shrink data
@@ -32,32 +34,13 @@ clean_coffee_df <- clean_coffee_df %>%
   mutate(age = case_when(
     age == "<18 years old" ~ "0-17 years old",
     age == ">65 years old" ~ "65+ years old",
-    TRUE ~ age
-  )) %>%
-  mutate(caffeine = case_when(
-    caffeine == "Full caffeine" ~ 1,
-    caffeine == "Half caff" ~ 0.5,
-    caffeine == "Decaf" ~ 0,
-    TRUE ~ 99
-  )) %>%
-  mutate(strength = case_when(
-    strength == "Weak" ~ 0,
-    strength == "Somewhat light" ~ 0.25,
-    strength == "Medium" ~ 0.5,
-    strength == "Somewhat strong" ~ 0.75,
-    strength == "Very strong" ~ 1,
-    TRUE ~ 99
-  )) %>%
-  mutate(roast_level = case_when(
-    roast_level == "Blonde" ~ 0,
-    roast_level == "Nordic" ~ 0.16666666666666,
-    roast_level == "Light" ~ 0.333333333333333,
-    roast_level == "Medium" ~ 0.5,
-    roast_level == "Dark" ~ 0.666666666666666666,
-    roast_level == "French" ~ 0.83333333333,
-    roast_level == "Italian" ~ 1,
-    TRUE ~ 99
-  )) # Make properly alphabetized
+    TRUE ~ age)) #%>%
+  # mutate(caffeine = factor(caffeine, levels = c("Decaf", "Half caff", "Full caffeine"))) %>%
+  # mutate(strength = factor(strength, levels = c("Weak", "Somewhat light", "Medium", "Somewhat strong", "Very strong"))) %>%
+  # mutate(roast_level = factor(roast_level, levels = c("Blonde", "Nordic", "Light", "Medium", "Dark", "French", "Italian")))
+
+
+
 
 new_coffee_df <- clean_coffee_df %>%
   mutate(age = case_when(
@@ -78,42 +61,83 @@ new_coffee_df <- clean_coffee_df %>%
 new_coffee_df
 
 # Perform ANOVA test
-aov_test <- aov(age ~ caffeine + roast_level + strength, data = new_coffee_df)
+aov_test <- aov(age ~ caffeine + strength + roast_level, data = new_coffee_df)
 
 # Print summary of the ANOVA test
 summary(aov_test)
 
 
+results <- TukeyHSD(aov_test)
 
-anova_results <- data.frame(
-  Factor = c("Caffeine", "Roast Level", "Strength"),
-  Sum_Sq = c(106, 3687, 15),
-  Mean_Sq = c(106, 3687, 15),
-  F_value = c(1.114, 38.765, 0.159),
-  Pr_F = c(0.291, 5.29e-10, 0.690),
-  Significance = c(" ", "***", " ")
-)
+roast_level_anova_S <- as.data.frame(results$strength)
+roast_level_anova_R <- as.data.frame(results$roast_level)
+roast_level_anova_C <- as.data.frame(results$caffeine)
+ 
+arrange(roast_level_anova_S, `p adj`)
+arrange(roast_level_anova_R, `p adj`)
+arrange(roast_level_anova_C, `p adj`)
 
-# Melt the data for plotting
-anova_melted <- anova_results %>%
-  pivot_longer(cols = c(Sum_Sq, Mean_Sq, F_value), names_to = "Metric", values_to = "Value")
 
-# Plot
-ggplot(anova_melted, aes(x = Factor, y = Value, fill = Metric)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  geom_text(aes(label = sprintf("%.2f", Value)), 
-            position = position_dodge(width = 0.9), 
-            vjust = -0.5) +
-  scale_fill_manual(values = c("Sum_Sq" = "steelblue", "Mean_Sq" = "darkorange", "F_value" = "forestgreen")) +
-  labs(title = "ANOVA Results",
-       x = "Factor",
-       y = "Value",
-       fill = "Metric") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_text(data = anova_melted %>% filter(Metric == "F_value"), 
-            aes(x = Factor, y = Value + 5, label = anova_results$Significance), 
-            vjust = -0.5, 
-            color = "black", 
-            size = 4)
+
+roast_level_anova_S <- mutate(roast_level_anova_S, names = rownames(roast_level_anova_S))
+roast_level_anova_S <- separate(roast_level_anova_S, names, c("first", "second"), sep = "-", remove = FALSE)
+
+strength_orderS <- c("Weak", "Somewhat light", "Medium", "Somewhat strong", "Very strong")
+strength_map <- setNames(seq_along(strength_orderS), strength_orderS)
+
+# Convert the values in 'first' and 'second' to their corresponding numeric values
+roast_level_anova_S <- roast_level_anova_S %>%
+  mutate(
+    first_numeric = strength_map[first],
+    second_numeric = strength_map[second],
+    val_diff = abs(first_numeric - second_numeric)
+  )
+
+model_roast_level_anova_S <- arrange(roast_level_anova_S, `p adj`, val_diff, names)
+model_roast_level_anova_S <- dplyr::select(model_roast_level_anova_S, names, val_diff, `p adj`)
+
+
+ggplot(roast_level_anova_S, aes(x = val_diff, y = `p adj`)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = names), 
+                  box.padding = 0.5, 
+                  point.padding = 0.3, 
+                  segment.color = 'grey50') +
+  labs(title = "Dot Plot of Difference Between Strength and its Corresponding p Value",
+       y = "p Value",
+       x = "Difference Between Strength") +
+  theme_minimal()
+
+
+
+
+roast_level_anova_R <- mutate(roast_level_anova_R, names = rownames(roast_level_anova_R))
+roast_level_anova_R <- separate(roast_level_anova_R, names, c("first", "second"), sep = "-", remove = FALSE)
+
+strength_orderR <- c("Blonde", "Nordic", "Light", "Medium", "Dark", "French", "Italian")
+strength_map <- setNames(seq_along(strength_orderR), strength_orderR)
+
+# Convert the values in 'first' and 'second' to their corresponding numeric values
+roast_level_anova_R <- roast_level_anova_R %>%
+  mutate(
+    first_numeric = strength_map[first],
+    second_numeric = strength_map[second],
+    val_diff = abs(first_numeric - second_numeric)
+  )
+
+model_roast_level_anova_R <- arrange(roast_level_anova_R, `p adj`, val_diff, names)
+model_roast_level_anova_R <- dplyr::select(model_roast_level_anova_R, names, val_diff, `p adj`)
+
+
+ggplot(roast_level_anova_R, aes(x = val_diff, y = `p adj`)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = names), 
+                  box.padding = 0.5, 
+                  point.padding = 0.3, 
+                  segment.color = 'grey50') +
+  labs(title = "Dot Plot of Difference Between Roast Levels and its Corresponding p Value",
+       y = "p Value",
+       x = "Difference Between Roast Levels") +
+  theme_minimal()
+
 ```

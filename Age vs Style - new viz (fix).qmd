@@ -31,17 +31,28 @@ new_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(style))
 
 #new_coffee_df <- slice_sample(new_coffee_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
 
-new_coffee_df <- dplyr::select(new_coffee_df, age, style, everything())
+new_coffee_df <- dplyr::select(new_coffee_df, age, style)
 new_coffee_df <- arrange(new_coffee_df, age, style)
 
 new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$style), ]
 
+new_rows <- data.frame(
+  style = c("empty1", "empty2", "empty3", "empty4", "empty5", "empty6", "empty7", "empty8", "empty9", "empty10", "empty11"),
+  age = rep(NA, 11)  # Matching the number of rows to the "age" column
+)
+
+# Add the new rows
+new_coffee_df <- rbind(new_coffee_df, new_rows)
+
 new_coffee_df
 
-desired_order = c("Fruity", "Juicy", "Sweet", "Bright", "Floral", "Light", "Chocolatey", "Caramalized", "Nutty", "Complex", "Bold", "Full Bodied")
+desired_order_style = c("empty6", "empty5", "empty4", "empty3", "empty2", "empty1", "Fruity", "Juicy", "Sweet", "Bright", "Floral", "Light", "Chocolatey", "Caramalized", "Nutty", "Complex", "Bold", "Full Bodied", "empty11", "empty10", "empty9", "empty8", "empty7")
 
-new_coffee_df$style <- factor(new_coffee_df$style, levels = desired_order, ordered = TRUE)
+new_coffee_df$style <- factor(new_coffee_df$style, levels = desired_order_style, ordered = TRUE)
 
+
+
+# Calculate counts
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
   tally(name = "count") %>%
@@ -50,6 +61,10 @@ new_coffee_df_summary <- new_coffee_df %>%
 # Convert to wide format for radar chart
 new_coffee_df_wide <- new_coffee_df_summary %>%
   pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Ensure the columns (styles) are in the desired order
+new_coffee_df_wide <- new_coffee_df_wide %>%
+  dplyr::select(age, all_of(desired_order_style))
 
 # Function to plot radar chart for one age group
 plot_radar_chart <- function(data, age_group) {
@@ -71,7 +86,8 @@ plot_radar_chart <- function(data, age_group) {
              cglcol = "grey", 
              cglty = 1, 
              axislabcol = "grey", 
-             vlcex = 0.8)
+             vlcex = 0.8,
+             title = paste("Proportion of Each Style for 0-17 Year Olds"))
 }
 
 # Specify the age group you want to visualize
@@ -90,7 +106,7 @@ if (age_group_to_plot %in% new_coffee_df$age) {
 
 
 
-
+# Calculate counts
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
   tally(name = "count") %>%
@@ -99,6 +115,10 @@ new_coffee_df_summary <- new_coffee_df %>%
 # Convert to wide format for radar chart
 new_coffee_df_wide <- new_coffee_df_summary %>%
   pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Ensure the columns (styles) are in the desired order
+new_coffee_df_wide <- new_coffee_df_wide %>%
+  select(age, all_of(desired_order_style))
 
 # Function to plot radar chart for one age group
 plot_radar_chart <- function(data, age_group) {
@@ -120,7 +140,8 @@ plot_radar_chart <- function(data, age_group) {
              cglcol = "grey", 
              cglty = 1, 
              axislabcol = "grey", 
-             vlcex = 0.8)
+             vlcex = 0.8,
+             title = paste("Proportion of Each Style for 18-24 Year Olds"))
 }
 
 # Specify the age group you want to visualize
@@ -139,16 +160,7 @@ if (age_group_to_plot %in% new_coffee_df$age) {
 
 
 
-
-
-
-
-
-
-
-
-
-
+# Calculate counts
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
   tally(name = "count") %>%
@@ -157,6 +169,10 @@ new_coffee_df_summary <- new_coffee_df %>%
 # Convert to wide format for radar chart
 new_coffee_df_wide <- new_coffee_df_summary %>%
   pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Ensure the columns (styles) are in the desired order
+new_coffee_df_wide <- new_coffee_df_wide %>%
+  select(age, all_of(desired_order_style))
 
 # Function to plot radar chart for one age group
 plot_radar_chart <- function(data, age_group) {
@@ -178,7 +194,8 @@ plot_radar_chart <- function(data, age_group) {
              cglcol = "grey", 
              cglty = 1, 
              axislabcol = "grey", 
-             vlcex = 0.8)
+             vlcex = 0.8,
+             title = paste("Proportion of Each Style for 25-34 Year Olds"))
 }
 
 # Specify the age group you want to visualize
@@ -198,14 +215,7 @@ if (age_group_to_plot %in% new_coffee_df$age) {
 
 
 
-
-
-
-
-
-
-
-
+# Calculate counts
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
   tally(name = "count") %>%
@@ -214,6 +224,10 @@ new_coffee_df_summary <- new_coffee_df %>%
 # Convert to wide format for radar chart
 new_coffee_df_wide <- new_coffee_df_summary %>%
   pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Ensure the columns (styles) are in the desired order
+new_coffee_df_wide <- new_coffee_df_wide %>%
+  select(age, all_of(desired_order_style))
 
 # Function to plot radar chart for one age group
 plot_radar_chart <- function(data, age_group) {
@@ -235,7 +249,8 @@ plot_radar_chart <- function(data, age_group) {
              cglcol = "grey", 
              cglty = 1, 
              axislabcol = "grey", 
-             vlcex = 0.8)
+             vlcex = 0.8,
+             title = paste("Proportion of Each Style for 35-44 Year Olds"))
 }
 
 # Specify the age group you want to visualize
@@ -255,15 +270,7 @@ if (age_group_to_plot %in% new_coffee_df$age) {
 
 
 
-
-
-
-
-
-
-
-
-
+# Calculate counts
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
   tally(name = "count") %>%
@@ -272,6 +279,10 @@ new_coffee_df_summary <- new_coffee_df %>%
 # Convert to wide format for radar chart
 new_coffee_df_wide <- new_coffee_df_summary %>%
   pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Ensure the columns (styles) are in the desired order
+new_coffee_df_wide <- new_coffee_df_wide %>%
+  select(age, all_of(desired_order_style))
 
 # Function to plot radar chart for one age group
 plot_radar_chart <- function(data, age_group) {
@@ -293,66 +304,8 @@ plot_radar_chart <- function(data, age_group) {
              cglcol = "grey", 
              cglty = 1, 
              axislabcol = "grey", 
-             vlcex = 0.8)
-}
-
-# Specify the age group you want to visualize
-age_group_to_plot <- "44-45 years old"  # Change this to the desired age group
-
-# Ensure the age group exists in the data
-if (age_group_to_plot %in% new_coffee_df$age) {
-  # Set up plotting area
-  par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))  # Single plot
-
-  # Plot radar chart for the specified age group
-  plot_radar_chart(new_coffee_df_wide, age_group_to_plot)
-} else {
-  cat("Age group", age_group_to_plot, "is not in the data.")
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-new_coffee_df_summary <- new_coffee_df %>%
-  group_by(age, style) %>%
-  tally(name = "count") %>%
-  ungroup()
-
-# Convert to wide format for radar chart
-new_coffee_df_wide <- new_coffee_df_summary %>%
-  pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
-
-# Function to plot radar chart for one age group
-plot_radar_chart <- function(data, age_group) {
-  data_filtered <- data %>%
-    filter(age == age_group) %>%
-    select(-age) %>%
-    as.data.frame()
-  
-  # Add rows for max and min values
-  radar_data <- rbind(rep(max(data_filtered), ncol(data_filtered)),  # Max
-                      rep(0, ncol(data_filtered)),  # Min
-                      data_filtered)  # Age group data
-
-  # Plot radar chart
-  radarchart(radar_data, axistype = 1, 
-             pcol = rainbow(nrow(radar_data) - 2), 
-             pfcol = alpha(rainbow(nrow(radar_data) - 2), 0.3), 
-             plwd = 2, 
-             cglcol = "grey", 
-             cglty = 1, 
-             axislabcol = "grey", 
-             vlcex = 0.8)
+             vlcex = 0.8,
+             title = paste("Proportion of Each Style for 45-54 Year Olds"))
 }
 
 # Specify the age group you want to visualize
@@ -372,17 +325,7 @@ if (age_group_to_plot %in% new_coffee_df$age) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+# Calculate counts
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
   tally(name = "count") %>%
@@ -391,6 +334,10 @@ new_coffee_df_summary <- new_coffee_df %>%
 # Convert to wide format for radar chart
 new_coffee_df_wide <- new_coffee_df_summary %>%
   pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Ensure the columns (styles) are in the desired order
+new_coffee_df_wide <- new_coffee_df_wide %>%
+  select(age, all_of(desired_order_style))
 
 # Function to plot radar chart for one age group
 plot_radar_chart <- function(data, age_group) {
@@ -412,7 +359,8 @@ plot_radar_chart <- function(data, age_group) {
              cglcol = "grey", 
              cglty = 1, 
              axislabcol = "grey", 
-             vlcex = 0.8)
+             vlcex = 0.8,
+             title = paste("Proportion of Each Style for 55-64 Year Olds"))
 }
 
 # Specify the age group you want to visualize
@@ -432,15 +380,7 @@ if (age_group_to_plot %in% new_coffee_df$age) {
 
 
 
-
-
-
-
-
-
-
-
-
+# Calculate counts
 new_coffee_df_summary <- new_coffee_df %>%
   group_by(age, style) %>%
   tally(name = "count") %>%
@@ -449,6 +389,10 @@ new_coffee_df_summary <- new_coffee_df %>%
 # Convert to wide format for radar chart
 new_coffee_df_wide <- new_coffee_df_summary %>%
   pivot_wider(names_from = style, values_from = count, values_fill = list(count = 0))
+
+# Ensure the columns (styles) are in the desired order
+new_coffee_df_wide <- new_coffee_df_wide %>%
+  select(age, all_of(desired_order_style))
 
 # Function to plot radar chart for one age group
 plot_radar_chart <- function(data, age_group) {
@@ -470,7 +414,8 @@ plot_radar_chart <- function(data, age_group) {
              cglcol = "grey", 
              cglty = 1, 
              axislabcol = "grey", 
-             vlcex = 0.8)
+             vlcex = 0.8,
+             title = paste("Proportion of Each Style for 65+ Year Olds"))
 }
 
 # Specify the age group you want to visualize

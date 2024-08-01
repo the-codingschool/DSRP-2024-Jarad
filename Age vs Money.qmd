@@ -55,6 +55,7 @@ summary_df <- new_coffee_df %>%
   mutate(percentage = (count / sum(count)) * 100)%>%
   mutate(total_spend = factor(total_spend, levels = desired_order))
 
+
 ## Create the bar plot
 ggplot(summary_df, aes(x = age, y = percentage, fill = total_spend)) +
   geom_bar(stat = "identity", position = "stack") +
