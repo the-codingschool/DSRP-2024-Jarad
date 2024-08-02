@@ -1,8 +1,6 @@
 ```{r}
 #Question: To what extent does age affect certain factors
 
-#I need to clean additions category - use "if includes"
-
 ##install if needed
 if(!require("dplyr")) install.packages("dplyr")
 if(!require("janitor")) install.packages("janitor")
