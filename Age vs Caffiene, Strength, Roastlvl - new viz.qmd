@@ -75,7 +75,7 @@ new_coffee_df_processed <- new_coffee_df %>%
 # Create the density plot with proportions
 ggplot(new_coffee_df_processed, aes(x = age, y = strength, fill = proportion)) +
   geom_tile() +
-  scale_fill_gradient(low = "brown", high = "red", 
+  scale_fill_gradient(low = "yellow", high = "purple", 
                       breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 1),
                       labels = scales::label_percent(accuracy = 1)) +
   labs(title = "Density of Strength vs Age Group (Proportional by Age Group)",
@@ -96,7 +96,7 @@ new_coffee_df_processed <- new_coffee_df %>%
 # Create the density plot with proportions
 ggplot(new_coffee_df_processed, aes(x = age, y = roast_level, fill = proportion)) +
   geom_tile() +
-  scale_fill_gradient(low = "brown", high = "red", 
+  scale_fill_gradient(low = "yellow", high = "purple", 
                       breaks = c(0, 0.15, 0.3, 0.45, 0.6, 0.75, 1),
                       labels = scales::label_percent(accuracy = 1)) +
   labs(title = "Density of Roast Level vs Age Group (Proportional by Age Group)",
@@ -117,7 +117,7 @@ new_coffee_df_processed <- new_coffee_df %>%
 # Create the density plot with proportions
 ggplot(new_coffee_df_processed, aes(x = age, y = caffeine, fill = proportion)) +
   geom_tile() +
-  scale_fill_gradient(low = "brown", high = "red", 
+  scale_fill_gradient(low = "yellow", high = "purple", 
                       breaks = c(0, 0.25, 0.5, 0.75, 1),
                       labels = scales::label_percent(accuracy = 1)) +
   labs(title = "Density of Caffeine vs Age Group (Proportional by Age Group)",
