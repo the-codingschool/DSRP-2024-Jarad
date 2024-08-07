@@ -1,0 +1,129 @@
+```{r}
+#Question: look at vs additions
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+
+clean_coffee_df <- coffee_df[!apply(coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+clean_coffee_df <- clean_coffee_df %>%
+  mutate(age = case_when(
+    age == "<18 years old" ~ "0-17 years old",
+    age == ">65 years old" ~ "65+ years old",
+    TRUE ~ age
+  )) %>%
+  mutate(caffeine = case_when(
+    caffeine == "Full caffeine" ~ "1",
+    caffeine == "Half caff" ~ "0.5",
+    caffeine == "Decaf" ~ "0",
+    TRUE ~ caffeine
+  )) %>%
+  mutate(strength = case_when(
+    strength == "Weak" ~ "1",
+    strength == "Somewhat light" ~ "2",
+    strength == "Medium" ~ "3",
+    strength == "Somewhat strong" ~ "4",
+    strength == "Very strong" ~ "5",
+    TRUE ~ strength
+  )) %>%
+  mutate(roast_level = case_when(
+    roast_level == "Blonde" ~ "1",
+    roast_level == "Nordic" ~ "1.5",
+    roast_level == "Light" ~ "2",
+    roast_level == "Medium" ~ "2.5",
+    roast_level == "Dark" ~ "3",
+    roast_level == "French" ~ "3.5",
+    roast_level == "Italian" ~ "4",
+    TRUE ~ roast_level
+  )) # Make properly alphabetized
+
+
+##exploring data
+new_coffee_df <- clean_coffee_df %>%
+  filter(!is.na(age), !is.na(strength), !is.na(roast_level), !is.na(caffeine)) %>%
+  dplyr::select(age, strength, roast_level, caffeine) %>%
+  arrange(age, strength, roast_level, caffeine)
+
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$strength), ]
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$roast_level), ]
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$caffeine), ]
+
+
+new_coffee_df
+
+new_coffee_df_processed <- new_coffee_df %>%
+  group_by(age, strength) %>%
+  tally() %>%
+  group_by(age) %>%
+  mutate(proportion = n / sum(n)) %>%
+  ungroup()
+
+# Create the density plot with proportions
+ggplot(new_coffee_df_processed, aes(x = age, y = strength, fill = proportion)) +
+  geom_tile() +
+  scale_fill_gradient(low = "yellow", high = "purple", 
+                      breaks = c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 1),
+                      labels = scales::label_percent(accuracy = 1)) +
+  labs(title = "Density of Strength vs Age Group (Proportional by Age Group)",
+       x = "Age Group",
+       y = "Strength",
+       fill = "Proportion") +
+  theme_minimal()
+
+
+
+new_coffee_df_processed <- new_coffee_df %>%
+  group_by(age, roast_level) %>%
+  tally() %>%
+  group_by(age) %>%
+  mutate(proportion = n / sum(n)) %>%
+  ungroup()
+
+# Create the density plot with proportions
+ggplot(new_coffee_df_processed, aes(x = age, y = roast_level, fill = proportion)) +
+  geom_tile() +
+  scale_fill_gradient(low = "yellow", high = "purple", 
+                      breaks = c(0, 0.15, 0.3, 0.45, 0.6, 0.75, 1),
+                      labels = scales::label_percent(accuracy = 1)) +
+  labs(title = "Density of Roast Level vs Age Group (Proportional by Age Group)",
+       x = "Age Group",
+       y = "Strength",
+       fill = "Proportion") +
+  theme_minimal()
+
+
+
+new_coffee_df_processed <- new_coffee_df %>%
+  group_by(age, caffeine) %>%
+  tally() %>%
+  group_by(age) %>%
+  mutate(proportion = n / sum(n)) %>%
+  ungroup()
+
+# Create the density plot with proportions
+ggplot(new_coffee_df_processed, aes(x = age, y = caffeine, fill = proportion)) +
+  geom_tile() +
+  scale_fill_gradient(low = "yellow", high = "purple", 
+                      breaks = c(0, 0.25, 0.5, 0.75, 1),
+                      labels = scales::label_percent(accuracy = 1)) +
+  labs(title = "Density of Caffeine vs Age Group (Proportional by Age Group)",
+       x = "Age Group",
+       y = "Strength",
+       fill = "Proportion") +
+  theme_minimal()
+
+```

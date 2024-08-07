@@ -1,0 +1,117 @@
+```{r}
+#Question: look at vs additions
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+
+clean_coffee_df <- coffee_df[!apply(coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+clean_coffee_df <- clean_coffee_df %>%
+  mutate(age = case_when(
+    age == "<18 years old" ~ "0-17 years old",
+    age == ">65 years old" ~ "65+ years old",
+    TRUE ~ age
+  )) %>%
+  mutate(caffeine = case_when(
+    caffeine == "Full caffeine" ~ "1",
+    caffeine == "Half caff" ~ "0.5",
+    caffeine == "Decaf" ~ "0",
+    TRUE ~ caffeine
+  )) %>%
+  mutate(strength = case_when(
+    strength == "Weak" ~ "1",
+    strength == "Somewhat light" ~ "2",
+    strength == "Medium" ~ "3",
+    strength == "Somewhat strong" ~ "4",
+    strength == "Very strong" ~ "5",
+    TRUE ~ strength
+  )) %>%
+  mutate(roast_level = case_when(
+    roast_level == "Blonde" ~ "1",
+    roast_level == "Nordic" ~ "1.5",
+    roast_level == "Light" ~ "2",
+    roast_level == "Medium" ~ "2.5",
+    roast_level == "Dark" ~ "3",
+    roast_level == "French" ~ "3.5",
+    roast_level == "Italian" ~ "4",
+    TRUE ~ roast_level
+  )) # Make properly alphabetized
+
+
+##exploring data
+new_coffee_df <- clean_coffee_df %>%
+  filter(!is.na(age), !is.na(strength), !is.na(roast_level), !is.na(caffeine)) %>%
+  select(age, strength, roast_level, caffeine) %>%
+  arrange(age, strength, roast_level, caffeine)
+
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$strength), ]
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$roast_level), ]
+new_coffee_df <- new_coffee_df[!is.na(new_coffee_df$caffeine), ]
+
+new_coffee_df
+
+#visualizing caffeine
+summary_df <- new_coffee_df %>%
+  group_by(age, caffeine) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(age) %>%
+  mutate(percentage = (count / sum(count)) * 100)
+
+## Create the bar plot
+ggplot(summary_df, aes(x = age, y = percentage, fill = caffeine)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Age Group", y = "Cafeine", title = "Caffeine by Age Group") +
+  theme_minimal()
+
+
+#visualizing roast level
+summary_df <- new_coffee_df %>%
+  group_by(age, roast_level) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(age) %>%
+  mutate(percentage = (count / sum(count)) * 100)
+
+## Create the bar plot
+ggplot(summary_df, aes(x = age, y = percentage, fill = roast_level)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Age Group", y = "Roast Level", title = "Roast Level by Age Group") +
+  theme_minimal()
+
+
+#visualizing strength
+summary_df <- new_coffee_df %>%
+  group_by(age, strength) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(age) %>%
+  mutate(percentage = (count / sum(count)) * 100)
+
+## Create the bar plot
+ggplot(summary_df, aes(x = age, y = percentage, fill = strength)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Age Group", y = "Strength", title = "Strength by Age Group") +
+  theme_minimal()
+
+new_coffee_df <- new_coffee_df %>%
+  mutate(
+    age = as.numeric(age),
+    roast_level = as.numeric(roast_level)
+  )
+
+
+##re viz for aveages, total up values and proportionaly average
+```
+

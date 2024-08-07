@@ -1,0 +1,41 @@
+# The Truth Behind Coffee For Each Age Group
+
+### By: Gregory Michaels
+
+#### Abstract:
+
+#### Background:
+
+This data set was taken from the "Great American Coffee Taste Test" in October 2023. It includes a taste test of 4 coffees ranked based on acidity, bitterness, and preference. This data table also includes other information about each individuals preference on metrics about coffee such as strength, style, spending habits, and much more. Additionally, other attributes about each participant is provided, for instance, ethnicity, gender, education level, and age.
+
+What I have decided to do is look deeper into each metric based on the age ranges given in the data set. The overarching idea I wanted to figure out was how to predict and
+
+#### Data Visualizations:
+
+![Figure 1: This plot depicts number of cups of coffee based on each age range](images/Screenshot 2024-07-26 122853.png){width="688"}
+
+![Figure 2.1: This plot depicts the unique styles of coffee and what percent of responses they each compose for each age range.](images/Screenshot 2024-07-31 194905.png)
+
+![Figure 2.2: These radar charts represent the unique styles. The farther out each point is, the larger the proportion of selection.](images/Screenshot 2024-08-07 151355.png)
+
+![Figure 3: This bar plot represent the proportion of each type of addition for each age group.](images/Screenshot 2024-07-26 130108.png)
+
+![Figure 4.1.1: This heat map represents the spread of selected strengths](images/Screenshot 2024-08-02 141102.png)
+
+![Figure 4.1.2: This heat map represents the spread of selected roast levels](images/Screenshot 2024-08-02 141154.png)
+
+![Figure 4.2.1: This is a dot plot of the distance between each strength and the corresponding p value. The lower the p value, the more corelated each strength is to a specific age range. The red line going across the screen is a linear regression model which tried to predict where values should occur. Interestingly, this did not follow my prediction of a line going from the top left to bottom right (This would signify that the extremes do have an influence on specific age ranges).](images/Screenshot 2024-08-02 133045.png)
+
+![Figure 4.2.2: This is a dot plot of the distance between each roast level and the corresponding p value. The lower the p value, the more corelated each roast level is to a specific age range. The red line going across the screen is a linear regression model which tried to predict where values should occur. Interestingly, this did not follow my prediction of a line going from the top left to bottom right (This would signify that the extremes do have an influence on specific age ranges).](images/Screenshot 2024-08-02 132858.png)
+
+![Figure 5.1: This figure represent the average amount sent on coffee for each age range.](images/Screenshot 2024-07-26 162454.png)
+
+![Figure 5.2: This line graph demonstrates that younger people truly do spend more on coffee per month.](images/Screenshot 2024-07-30 145417.png)
+
+![Figure 6: This bar plot display the unique locations where each age range drinks their coffee.](images/Screenshot 2024-07-26 141525.png)
+
+#### Conclusions - The Next Step:
+
+After my three weeks of research deeper into the coffee data set, I have realized that there is much more to this information than just a bunch of numbers being analyzed. The final idea I have taken away is that
+
+Git repo link: <https://github.com/the-codingschool/DSRP-2024-Jarad.git>

@@ -1,0 +1,171 @@
+```{r}
+#Question: look at vs additions
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+if(!require("caTools")) install.packages("caTools")
+if(!require("ggrepel")) install.packages("ggrepel")
+
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(caTools)
+library(ggrepel)
+
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+
+clean_coffee_df <- coffee_df[!apply(coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+clean_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(caffeine), !is.na(strength), !is.na(roast_level))
+clean_coffee_df <- arrange(clean_coffee_df, age, caffeine, strength, roast_level)
+clean_coffee_df <- dplyr::select(clean_coffee_df, age, caffeine, strength, roast_level)
+
+clean_coffee_df <- clean_coffee_df %>%
+  mutate(age = case_when(
+    age == "<18 years old" ~ "0-17 years old",
+    age == ">65 years old" ~ "65+ years old",
+    TRUE ~ age)) #%>%
+  # mutate(caffeine = factor(caffeine, levels = c("Decaf", "Half caff", "Full caffeine"))) %>%
+  # mutate(strength = factor(strength, levels = c("Weak", "Somewhat light", "Medium", "Somewhat strong", "Very strong"))) %>%
+  # mutate(roast_level = factor(roast_level, levels = c("Blonde", "Nordic", "Light", "Medium", "Dark", "French", "Italian")))
+
+
+
+
+new_coffee_df <- clean_coffee_df %>%
+  mutate(age = case_when(
+        age == "0-17 years old" ~ 15,
+        age == "18-24 years old" ~ 23,
+        age == "25-34 years old" ~ 44,
+        age == "35-44 years old" ~ 43,
+        age == "45-54 years old" ~ 53,
+        age == "55-64 years old" ~ 63,
+        age == "65+ years old" ~ 73,
+        TRUE ~ 99
+  ))
+  
+
+# Perform ANOVA test
+aov_test <- aov(age ~ caffeine + strength + roast_level, data = new_coffee_df)
+
+# Print summary of the ANOVA test
+summary(aov_test)
+
+
+results <- TukeyHSD(aov_test)
+
+roast_level_anova_S <- as.data.frame(results$strength)
+roast_level_anova_R <- as.data.frame(results$roast_level)
+roast_level_anova_C <- as.data.frame(results$caffeine)
+ 
+arrange(roast_level_anova_S, `p adj`)
+arrange(roast_level_anova_R, `p adj`)
+arrange(roast_level_anova_C, `p adj`)
+
+
+
+roast_level_anova_S <- mutate(roast_level_anova_S, names = rownames(roast_level_anova_S))
+roast_level_anova_S <- separate(roast_level_anova_S, names, c("first", "second"), sep = "-", remove = FALSE)
+
+strength_orderS <- c("Weak", "Somewhat light", "Medium", "Somewhat strong", "Very strong")
+strength_map <- setNames(seq_along(strength_orderS), strength_orderS)
+
+# Convert the values in 'first' and 'second' to their corresponding numeric values
+roast_level_anova_S <- roast_level_anova_S %>%
+  mutate(
+    first_numeric = strength_map[first],
+    second_numeric = strength_map[second],
+    val_diff = abs(first_numeric - second_numeric)
+  )
+
+model_roast_level_anova_S <- arrange(roast_level_anova_S, `p adj`, val_diff, names)
+model_roast_level_anova_S <- dplyr::select(model_roast_level_anova_S, names, val_diff, `p adj`)
+
+model_roast_level_anova_S
+
+ggplot(roast_level_anova_S, aes(x = val_diff, y = `p adj`)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = names), 
+                  box.padding = 0.5, 
+                  point.padding = 0.3, 
+                  segment.color = 'grey50') +
+  labs(title = "Dot Plot of Difference Between Strength and its Corresponding p Value",
+       y = "p Value",
+       x = "Difference Between Strength") +
+  theme_minimal()
+
+# to create a linear regression model
+lm_model <- lm(`p adj` ~ val_diff, data = model_roast_level_anova_S)
+# Summary of the lr model
+summary(lm_model)
+# Plotting the linear regression line on the plot
+
+ggplot(model_roast_level_anova_S, aes(x = val_diff, y = `p adj`)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = names), box.padding = 0.5, point.padding = 0.3, segment.color = 'grey50') +
+  geom_smooth(method = "lm", col = "brown", se = FALSE) +  
+  labs(title = "Dot Plot of Difference Between Roast Levels and its Corresponding p Value with Regression Line",
+       y = "p Value",
+       x = "Difference Between Roast Levels") +
+  theme_minimal()
+
+
+
+
+roast_level_anova_R <- mutate(roast_level_anova_R, names = rownames(roast_level_anova_R))
+roast_level_anova_R <- separate(roast_level_anova_R, names, c("first", "second"), sep = "-", remove = FALSE)
+
+strength_orderR <- c("Blonde", "Nordic", "Light", "Medium", "Dark", "French", "Italian")
+strength_map <- setNames(seq_along(strength_orderR), strength_orderR)
+
+# Convert the values in 'first' and 'second' to their corresponding numeric values
+roast_level_anova_R <- roast_level_anova_R %>%
+  mutate(
+    first_numeric = strength_map[first],
+    second_numeric = strength_map[second],
+    val_diff = abs(first_numeric - second_numeric)
+  )
+
+model_roast_level_anova_R <- arrange(roast_level_anova_R, `p adj`, val_diff, names)
+model_roast_level_anova_R <- dplyr::select(model_roast_level_anova_R, names, val_diff, `p adj`)
+
+model_roast_level_anova_R
+
+ggplot(roast_level_anova_R, aes(x = val_diff, y = `p adj`)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = names), 
+                  box.padding = 0.5, 
+                  point.padding = 0.3, 
+                  segment.color = 'grey50') +
+  labs(title = "Dot Plot of Difference Between Roast Levels and its Corresponding p Value",
+       y = "p Value",
+       x = "Difference Between Roast Levels") +
+  theme_minimal()
+
+
+
+lm_model <- lm(`p adj` ~ val_diff, data = model_roast_level_anova_R)
+# Summary of the lr model
+summary(lm_model)
+# Plotting the linear regression line on the plot
+
+ggplot(model_roast_level_anova_R, aes(x = val_diff, y = `p adj`)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = names), box.padding = 0.5, point.padding = 0.3, segment.color = 'grey50') +
+  geom_smooth(method = "lm", col = "brown", se = FALSE) +  
+  labs(title = "Dot Plot of Difference Between Roast Levels and its Corresponding p Value with Regression Line",
+       y = "p Value",
+       x = "Difference Between Roast Levels") +
+  theme_minimal()
+```
+

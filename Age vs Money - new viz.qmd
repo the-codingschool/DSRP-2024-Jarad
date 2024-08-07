@@ -1,0 +1,82 @@
+```{r}
+#Question: To what extent does age affect certain factors
+
+#I need to clean additions category - use "if includes"
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+clean_coffee_df <- mutate(coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", 
+                                                     age == ">65 years old" ~ "65+ years old",
+                                                     TRUE ~ age)) # Make <18 and >65 years old properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, total_spend = case_when(total_spend == "<$20" ~ "$0-$20", TRUE ~ total_spend)) # Make Less than 1 properly alphabetized
+clean_coffee_df <- mutate(clean_coffee_df, total_spend = case_when(total_spend == ">$100" ~ "$100+", TRUE ~ total_spend)) # Make Less than 1 properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, most_paid = case_when(most_paid == "Less than $2" ~ "$0-$2", TRUE ~ most_paid)) # Make Less than 1 properly alphabetized
+clean_coffee_df <- mutate(clean_coffee_df, most_paid = case_when(most_paid == "More than $20" ~ "$20+", TRUE ~ most_paid)) # Make Less than 1 properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, most_willing = case_when(most_willing == "Less than $2" ~ "$0-$2", TRUE ~ most_willing)) # Make Less than 1 properly alphabetized
+clean_coffee_df <- mutate(clean_coffee_df, most_willing = case_when(most_willing == "More than $20" ~ "$20+", TRUE ~ most_willing)) # Make Less than 1 properly alphabetized
+
+clean_coffee_df <- clean_coffee_df[!apply(clean_coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+##exploring data
+new_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(total_spend), !is.na(most_paid), !is.na(most_willing))
+new_coffee_df <- arrange(new_coffee_df, age, total_spend, most_paid, most_willing)
+new_coffee_df <- select(new_coffee_df, age, total_spend, most_paid, most_willing)
+#new_coffee_df <- slice_sample(new_coffee_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+
+new_coffee_df
+
+math_coffee_df <- new_coffee_df %>%
+  mutate(total_spend = case_when(
+        total_spend == "$0-$20" ~ 10,
+        total_spend == "$20-$40" ~ 30,
+        total_spend == "$40-$60" ~ 50,
+        total_spend == "$60-$80" ~ 70,
+        total_spend == "$80-$100" ~ 90,
+        total_spend == "$100+" ~ 110,
+        TRUE ~ 99999
+        ))
+
+average_spend_by_age <- math_coffee_df %>%
+  group_by(age) %>%
+  summarize(
+    total_spend_sum = sum(total_spend, na.rm = TRUE),  # Sum of total_spend for each age range
+    count = n(),                                        # Count of entries for each age range
+    average_spend = total_spend_sum / count             # Average of total_spend for each age range
+  )
+
+print(average_spend_by_age)
+
+ggplot(average_spend_by_age, aes(x = age, y = average_spend, fill = age)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average Spending by Age Range",
+       x = "Age Range",
+       y = "Average Spending") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(average_spend_by_age, aes(x = age, y = average_spend, group = 1)) +
+  geom_line(size = 3.3, color = "black") +    # Thicker line
+  geom_point(size = 5.3, color = "brown") +      # Larger, colored points
+  labs(title = "Average Spending by Age Range",
+       x = "Age Range",
+       y = "Average Spending") +
+  theme_minimal()
+```
+

@@ -1,0 +1,91 @@
+```{r}
+#Question: To what extent does age affect certain factors
+
+##install if needed
+if(!require("dplyr")) install.packages("dplyr")
+if(!require("janitor")) install.packages("janitor")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("tidyr")) install.packages("tidyr")
+if(!require("readr")) install.packages("readr")
+
+##bring in libraries
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+##pull and shrink data
+coffee_df <- read_csv("C:/Users/grego/Downloads/coffee_survey.csv")
+clean_coffee_df <- mutate(coffee_df, age = case_when(age == "<18 years old" ~ "0-17 years old", 
+                                                     age == ">65 years old" ~ "65+ years old",
+                                                     TRUE ~ age)) # Make <18 and >65 years old properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, total_spend = case_when(total_spend == "<$20" ~ "$0-$20", TRUE ~ total_spend)) # Make Less than 1 properly alphabetized
+clean_coffee_df <- mutate(clean_coffee_df, total_spend = case_when(total_spend == ">$100" ~ "$100+", TRUE ~ total_spend)) # Make Less than 1 properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, most_paid = case_when(most_paid == "Less than $2" ~ "$0-$2", TRUE ~ most_paid)) # Make Less than 1 properly alphabetized
+clean_coffee_df <- mutate(clean_coffee_df, most_paid = case_when(most_paid == "More than $20" ~ "$20+", TRUE ~ most_paid)) # Make Less than 1 properly alphabetized
+
+clean_coffee_df <- mutate(clean_coffee_df, most_willing = case_when(most_willing == "Less than $2" ~ "$0-$2", TRUE ~ most_willing)) # Make Less than 1 properly alphabetized
+clean_coffee_df <- mutate(clean_coffee_df, most_willing = case_when(most_willing == "More than $20" ~ "$20+", TRUE ~ most_willing)) # Make Less than 1 properly alphabetized
+
+clean_coffee_df <- clean_coffee_df[!apply(clean_coffee_df[, -1], 1, function(x) all(is.na(x))), ] #remove data if everything is NA
+
+##exploring data
+new_coffee_df <- filter(clean_coffee_df, !is.na(age), !is.na(total_spend), !is.na(most_paid), !is.na(most_willing))
+new_coffee_df <- arrange(new_coffee_df, age, total_spend, most_paid, most_willing)
+new_coffee_df <- select(new_coffee_df, age, total_spend, most_paid, most_willing)
+#new_coffee_df <- slice_sample(new_coffee_df, n = 41 )# I chose 41 because that is the max rows visible on my screen
+new_coffee_df
+
+print(unique(new_coffee_df$total_spend))
+print(unique(new_coffee_df$most_paid))
+print(unique(new_coffee_df$most_willing))
+
+#visualizing
+desired_order = c("$0-$20", "$20-$40", "$40-$60", "$60-$80", "$80-$100", "$100+")
+
+summary_df <- new_coffee_df %>%
+  group_by(age, total_spend) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(age) %>%
+  mutate(percentage = (count / sum(count)) * 100)%>%
+  mutate(total_spend = factor(total_spend, levels = desired_order))
+
+
+## Create the bar plot
+ggplot(summary_df, aes(x = age, y = percentage, fill = total_spend)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Age Group", y = "Percentage", title = "Amount Spent on Coffee per Month") +
+  theme_minimal()
+
+#visualizing
+summary_df <- new_coffee_df %>%
+  group_by(age, most_willing) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(age) %>%
+  mutate(percentage = (count / sum(count)) * 100)%>%
+  mutate(most_willing = factor(most_willing, levels = c("$0-$2", "$2-$4", "$4-$6", "$6-$8", "$8-$10", "$10-$15", "$15-$20", "$20+")))
+
+## Create the bar plot
+ggplot(summary_df, aes(x = age, y = percentage, fill = most_willing)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Age Group", y = "Percentage", title = "Most Willing to Spend on Cup of Coffee") +
+  theme_minimal()
+
+#visualizing
+summary_df <- new_coffee_df %>%
+  group_by(age, most_paid) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(age) %>%
+  mutate(percentage = (count / sum(count)) * 100)%>%
+  mutate(most_paid = factor(most_paid, levels = c("$0-$2", "$2-$4", "$4-$6", "$6-$8", "$8-$10", "$10-$15", "$15-$20", "$20+")))
+
+
+## Create the bar plot
+ggplot(summary_df, aes(x = age, y = percentage, fill = most_paid)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Age Group", y = "Percentage", title = "Most Ever Paid For Cup of Coffee") +
+  theme_minimal()
+```
