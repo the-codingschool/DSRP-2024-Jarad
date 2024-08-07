@@ -1,0 +1,52 @@
+---
+title: "Written Report"
+format: html
+editor: visual
+---
+
+Background:
+
+In October of 2023, James Hoffmann and coffee company Comeeter held a survey for viewers on video-streaming platform YouTube. To fill out this survey, viewers from all across the United States were required to taste four of Comeeter's coffee products and answer various questions both from their preferences between the four coffees and their personal information.
+
+Hypothesis: As one has to work more and harder, the more they spend on coffee.
+
+Research Question: How is coffee spending affected by one's work level?
+
+Results:
+
+```{r}
+echo = F
+
+ggplot(coffee_survey, aes(x = education, y = cups, fill = education)) +
+  geom_violin() +
+  labs(title = "Coffee Consumption by Education Level",
+       x = "Education Level",
+       y = "Number of Cups of Coffee") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set3")
+
+```
+
+**Figure 1 Cups of Coffee per Education Level:**
+
+This is a plot that compares how many cups of coffee one drinks per day and the highest level of education one has achieved. From this plot, we can see that there is not much correlation; however, we also see that people who do not have any college degree did not report more than three cups of coffee per day. Looking at the graph at a whole, majority of survey takers reported drinking two cups of coffee per day.
+
+```{r}
+echo = F
+
+ggplot(coffee_survey_percent, aes(x = education, y = percentage, fill = most_paid_cup)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = sprintf("%.1f%%", percentage)),
+            position = position_fill(vjust = 0.5), size = 3, color = "black") +
+  labs(title = "Most Paid for Cup of Coffee",
+       x = "Education",
+       y = "Percentage") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**Figure 2 Most Paid for One Cup of Coffee per Education Level:**
+
+This plot represents the percentage of people, in their respected education level, and how much they have paid for one cup of coffee in their life. In this graph, we see a clear correlation regarding the light green twenty dollars or more. It steadily increases as one gets further along the education system; the opposite is found with turquoise and light yellow. As one gets a higher level of education, they spend less on cheap coffee and prefer more expensive coffee.
