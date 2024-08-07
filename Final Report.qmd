@@ -1,0 +1,19 @@
+# The Truth Behind Coffee For Each Age Group
+
+### By: Gregory Michaels
+
+#### Abstract:
+
+#### Background:
+
+This data set was taken from the "Great American Coffee Taste Test" in October 2023. It includes a taste test of 4 coffees ranked based on acidity, bitterness, and preference. This data table also includes other information about each individuals preference on metrics about coffee such as strength, style, spending habits, and much more. Additionaly, other attributes about each participant is provided, for instance, ethnicity, gender, education level, and age.
+
+What I have decided to do is look deeper into each metric and
+
+#### Data Visualizations:
+
+#### Conclusions - The Next Step:
+
+After my three weeks of research deeper into the coffee data set, I have realized that there is much more to this information than just a bunch of numbers being analyzed. The final idea I have taken away is that
+
+Git repo link: <https://github.com/the-codingschool/DSRP-2024-Jarad.git>
