@@ -35,6 +35,9 @@ ggplot(coffee_survey_percent, aes(x = age, y = percentage, fill = roast_level)) 
   scale_fill_brewer(palette = "Set3") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+coffee_survey_percent <- mutate(coffee_survey_percent, age = case_when(age == "<18 years old" ~ "0-17 years old", TRUE ~ age)) 
+
+coffee_survey_percent <- mutate(coffee_survey_percent, age = case_when(age == ">65 years old" ~ "65+ years old", TRUE ~ age)) 
 
 coffee_survey_percent <- coffee_survey %>%
   group_by(age, caffeine) %>%
@@ -43,7 +46,6 @@ coffee_survey_percent <- coffee_survey %>%
   mutate(percentage = n / sum(n) * 100) %>%
   ungroup()
 
-# Stacked Bar Chart: Percentage of Caffeine Preferences by Age
 ggplot(coffee_survey_percent, aes(x = age, y = percentage, fill = caffeine)) +
   geom_bar(stat = "identity", position = "fill") +
   geom_text(aes(label = sprintf("%.1f%%", percentage)),
