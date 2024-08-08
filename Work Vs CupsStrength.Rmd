@@ -4,7 +4,6 @@
 coffee_survey$cups <- as.numeric(as.character(coffee_survey$cups))
 coffee_survey$wfh <- as.factor(coffee_survey$wfh)
 
-# Handle missing values
 coffee_survey <- coffee_survey %>% drop_na(cups, wfh)
 
 ggplot(coffee_survey, aes(x = wfh, y = cups, fill = wfh)) +
@@ -23,13 +22,14 @@ ggplot(coffee_survey, aes(x = wfh, y = cups, fill = wfh)) +
   theme_minimal() +
   scale_fill_brewer(palette = "Set2")
 
-ggplot(coffee_survey, aes(x = cups, fill = wfh)) +
+ggplot(coffee_survey, aes(x = cups, fill = monthly_spend)) +
   geom_density(alpha = 0.5) +
   labs(title = "Density Plot of Coffee Consumption by Work From Home Status",
        x = "Number of Cups of Coffee",
        y = "Density") +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set2")
+  scale_fill_brewer(palette = "Set2") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 
@@ -47,7 +47,8 @@ coffee_survey %>%
        x = "Coffee Strength",
        y = "Count") +
   theme_minimal() +
-  scale_fill_brewer(palette = "Set2")
+  scale_fill_brewer(palette = "Set2") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
 ```
