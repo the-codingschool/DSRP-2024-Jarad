@@ -1,0 +1,100 @@
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+library(fs)
+
+coffee_survey <- coffee_survey %>% drop_na(monthly_spend, education)
+
+head(coffee_survey_percent)
+
+coffee_survey_percent <- coffee_survey %>%
+  group_by(education, monthly_spend) %>%
+  tally() %>%
+  group_by(education) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  ungroup()
+
+#Alphabetize Education
+coffee_survey %>%
+  mutate(education = case_when(education_level == "Less than high school" ~ "A. Less than Highschool",
+                               education_level == "High school graduate" ~ "B. Highschool Graduate",
+                               education_level == "3. Some college or associate's degree" ~ "C. Some college or associate's degree",
+                               education_level == "4. Bachelor's degree" ~ "D. Bachelor's degree",
+                               education_level == "5. Master's degree" ~ "E. Master's degree",
+                               education_level == "6. Doctorate or professional degree" ~ "F. Doctorate or professional degree")) -> coffee_survey
+
+# Alphabetize Total Spend
+coffee_survey %>%
+  mutate(monthly_spend = case_when(total_spend == "<$20" ~ "$0-$20",
+                                   total_spend == "$20-$40" ~ "$20-$40",
+                                   total_spend == "$40-$60" ~ "$40-$60",
+                                   total_spend == "$60-$80" ~ "$60-$80",
+                                   total_spend == "$80-$100" ~ "$80-$100",
+                                   total_spend == ">$100" ~ "100+")) -> coffee_survey
+
+
+ggplot(coffee_survey_percent, aes(x = education, y = percentage, fill = monthly_spend)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = sprintf("%.1f%%", percentage)),
+            position = position_fill(vjust = 0.5), size = 3, color = "white") +
+  labs(title = "Monthly Spend by Education Level",
+       x = "Education Level",
+       y = "Percentage") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(coffee_survey, aes(x = education, y = "count", fill = monthly_spend)) +
+  geom_bar(stat = "identity", position = "fill")
+
+
+coffee_survey %>%
+  mutate(most_paid_cup = case_when(most_paid == "$2-$4"~ "B. $2-4",
+                              most_paid == "$4-$6" ~ "C. $4-6",
+                              most_paid == "$6-$8" ~ "D. $6-8",
+                              most_paid == "$8-$10" ~ "E. $8-10",
+                              most_paid == "$10-$15" ~ "F. $10-15",
+                              most_paid == "Less than $2" ~ "A. $0-2",
+                              most_paid == "More than $20" ~ "G. $20+")) -> coffee_survey
+
+coffee_survey <- coffee_survey %>% drop_na(most_paid_cup)
+
+
+coffee_survey_percent <- coffee_survey %>%
+  group_by(education, most_paid_cup) %>%
+  tally() %>%
+  group_by(education) %>%
+  mutate(percentage = n / sum(n) * 100) %>%
+  ungroup()
+
+ggplot(coffee_survey, aes(x = education, y = "count", fill = most_paid_cup)) +
+  geom_bar(stat = "identity", position = "fill") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(coffee_survey_percent, aes(x = education, y = percentage, fill = most_paid_cup)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = sprintf("%.1f%%", percentage)),
+            position = position_fill(vjust = 0.5), size = 3, color = "black") +
+  labs(title = "Percentage of Most Paid for Cup",
+       x = "Education",
+       y = "Percentage") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+```
+
+
+
+
+```{r}
+
+```
+
+

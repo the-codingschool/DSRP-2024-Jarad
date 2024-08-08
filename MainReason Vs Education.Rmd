@@ -1,0 +1,80 @@
+```{r}
+coffee_survey <- coffee_survey %>%
+  mutate(main_reason = case_when(
+    grepl("ritual", why_drink, ignore.case = TRUE) ~ "I need the ritual",
+    grepl("bathroom", why_drink, ignore.case = TRUE) ~ "It makes me go to the bathroom",
+    grepl("tastes good", why_drink, ignore.case = TRUE) ~ "It tastes good",
+    grepl("caffeine", why_drink, ignore.case = TRUE) ~ "I need the caffeine",
+    TRUE ~ "Other"
+  ))
+
+coffee_survey %>%
+  mutate(age = case_when(age == "<18 years old" ~ "0-18 years old",
+                                   age == "18-24 years old" ~ "18-24 years old",
+                                   age == "25-34 years old" ~ "25-34 years old",
+                                   age == "35-44 years old" ~ "35-44 years old",
+                                   age == "45-54 years old" ~ "45-54 years old",
+                                   age == "44-64 years old" ~ "44-64 years old",
+                                   age == ">65 years old" ~ "65+ years old")) -> coffee_survey
+
+
+
+
+ggplot(coffee_survey, aes(x = education, fill = main_reason)) +
+  geom_bar(position = "fill") +
+  labs(title = "Main Reasons for Drinking Coffee by Education Level",
+       x = "Education Level",
+       y = "Proportion",
+       fill = "Main Reason for Drinking Coffee") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format())
+
+
+ggplot(coffee_survey, aes(x = age, fill = main_reason)) +
+  geom_bar(position = "fill") +
+  labs(title = "Main Reasons for Drinking Coffee by Age",
+       x = "Education Level",
+       y = "Proportion",
+       fill = "Main Reason for Drinking Coffee") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+###
+
+
+
+coffee_survey <- coffee_survey %>% drop_na(spent_equipment, most_willing)
+
+coffee_survey %>%
+  mutate(spent_equipment = case_when(spent_equipment == "Less than $20" ~ "A. $0-20",
+                                     spent_equipment == "$50-$100" ~  "C. $50-$100",
+                                     spent_equipment == "$100-$300" ~ "D. $100-$300",
+                                     spent_equipment == "$20-$50" ~ "B. $20-$50",
+                                     spent_equipment == "$300-$500" ~ "E. $300-$500",
+                                     spent_equipment == "$500-$1000" ~ "F. $500-$1000",
+                                     spent_equipment == "More than $1,000" ~ "G. $1000 +")) -> coffee_survey
+
+
+
+
+ggplot(coffee_survey, aes(x = education, fill = spent_equipment)) +
+  geom_bar(position = "fill") +
+  labs(title = "Main Reasons for Drinking Coffee by Age",
+       x = "Education Level",
+       y = "Proportion",
+       fill = "Main Reason for Drinking Coffee") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+
+
+
+
+
+
+
+
+
+```
+

@@ -1,0 +1,183 @@
+```{r}
+
+library(tidyverse)
+library(janitor)
+library(here)
+library(fs)
+library(class)
+library(caret)
+library(FNN)
+library(caTools)
+library(scales)
+library(xgboost)
+
+```
+
+```{r}
+data <- coffee_survey %>%
+  select(age, education, gender, employment_status, monthly_spend,) %>%
+  drop_na()
+
+
+set.seed(123)
+
+data$age <- as.numeric(factor(data$age))
+data$education<- as.numeric(factor(data$education))
+data$gender <- as.numeric(factor(data$gender))
+
+split <- sample.split(data$monthly_spend, SplitRatio = 0.8)
+train_data <- subset(data, split == TRUE)
+test_data <- subset(data, split == FALSE)
+
+knn_model <- knn(train = train_data[,c("age", "education", "gender" )],
+                 test = test_data[,c("age", "education", "gender")],
+                 cl = train_data$monthly_spend, k = 5 )
+pred <- knn_model
+confusion_matrix <- table(test_data$monthly_spend, pred)
+accuracy <- sum(diag(confusion_matrix))/ sum(confusion_matrix)
+print(confusion_matrix)
+print(accuracy)
+```
+
+
+```{r}
+## XGBOOST
+
+xgb_data <- coffee_survey %>%
+  group_by(education, employment_status, gender, age, wfh, number_children, main_reason, monthly_spend) %>%
+  tally() %>%
+  group_by(education)
+
+xgb_data <- xgb_data %>% drop_na(education, age, wfh, employment_status, gender, number_children, main_reason, monthly_spend, n)
+
+
+xgb_data$wfh <- as.numeric(factor(xgb_data$wfh))
+xgb_data$number_children<- as.numeric(factor(xgb_data$number_children))
+xgb_data$main_reason <- as.numeric(factor(xgb_data$main_reason))
+xgb_data$employment_status <- as.numeric(factor(xgb_data$employment_status))
+xgb_data$age <- as.numeric(factor(xgb_data$age))
+xgb_data$gender<- as.numeric(factor(xgb_data$gender))
+xgb_data$education <- as.numeric(factor(xgb_data$education))
+
+
+
+
+y <- as.numeric(factor(xgb_data$monthly_spend))
+X <- xgb_data %>% select(- monthly_spend)
+X <- X %>% select(- n)
+
+
+
+
+
+X$age <- rescale(X$age)
+X$education <- rescale(X$education)
+X$gender <- rescale(X$gender)
+X$employment_status <- rescale(X$employment_status)
+X$wfh <- rescale(X$wfh)
+X$number_children <- rescale(X$number_children)
+X$main_reason <- rescale(X$main_reason)
+
+y <- rescale(y)
+
+params <- list(set.seed = 123,
+               eval_metric = "auc",
+               objective = "binary:logistic")
+
+X_matrix <- as.matrix(X)
+
+xgb_model <- xgboost(data = as.matrix(X),
+                     label = y,
+                     params = params,
+                     nrounds = 2000,
+                     verbose = 1)
+
+xgb.plot.shap(data = as.matrix(X),
+              model = xgb_model,
+              top_n = 6)
+              
+
+
+
+```
+```{r}
+lr_data <- coffee_survey %>%
+  group_by(education, employment_status, gender, age, wfh, number_children, main_reason, monthly_spend) %>%
+  tally() %>%
+  group_by(education)
+
+lr_data <- lr_data %>% drop_na(education, age, wfh, employment_status, gender, number_children, main_reason, monthly_spend)
+
+
+lr_data <- lr_data %>%
+  mutate(monthly_spend = case_when(
+    monthly_spend == "$0-$20" ~ 10,
+    monthly_spend == "$20-$40" ~ 30,
+    monthly_spend == "$40-$60" ~ 50,
+    monthly_spend == "$60-$80" ~ 70,
+    monthly_spend == "$80-$100" ~ 90,
+    monthly_spend == "100+" ~ 110,
+    TRUE ~ 99
+  ))
+
+lr_data %>%
+  mutate(employment_status = case_when(employment_status == "Unemployed" ~ "A. Unemployed",
+                                   employment_status == "Student" ~ "C. Student",
+                                   employment_status == "Retired" ~ "B. Retired",
+                                   employment_status == "Homemaker" ~ "D. Homemaker",
+                                   employment_status == "Employed part-time" ~ "E. Employed part-time",
+                                   employment_status == "Employed full-time" ~ "F. Employed full-time")) -> lr_data
+
+
+model <- lm(monthly_spend ~ education + employment_status + wfh, data = lr_data)
+
+pred <- predict(model, lr_data)
+
+ggplot(lr_data, aes(x = education, group = 1)) +
+  geom_point(aes(y = monthly_spend, color = "Actual"), position = position_jitter(width = 0.2)) +
+  geom_point(aes(y = pred, color = "Predicted")) +
+  geom_smooth(aes(y = pred), method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Predicted vs Actual Total Spend by Education Level",
+    x = "Education Level",
+    y = "Total Spend"
+  ) +
+  scale_color_manual(name = "Legend", values = c("Actual" = "blue", "Predicted" = "red")) +
+  theme_minimal() +
+  theme(legend.position = "top") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+
+
+ggplot(lr_data, aes(x = employment_status, group = 1)) +
+  geom_point(aes(y = monthly_spend, color = "Actual"), position = position_jitter(width = 0.2)) +
+  geom_point(aes(y = pred, color = "Predicted")) +
+  geom_smooth(aes(y = pred), method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Predicted vs Actual Total Spend by Employment Status",
+    x = "Employment Status",
+    y = "Total Spend"
+  ) +
+  scale_color_manual(name = "Legend", values = c("Actual" = "blue", "Predicted" = "red")) +
+  theme_minimal() +
+  theme(legend.position = "top") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+
+
+ggplot(lr_data, aes(x = wfh, group = 1)) +
+  geom_point(aes(y = monthly_spend, color = "Actual"), position = position_jitter(width = 0.2)) +
+  geom_point(aes(y = pred, color = "Predicted")) +
+  geom_smooth(aes(y = pred), method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Predicted vs Actual Total Spend by WFH Status",
+    x = "WFH Status",
+    y = "Total Spend"
+  ) +
+  scale_color_manual(name = "Legend", values = c("Actual" = "blue", "Predicted" = "red")) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
